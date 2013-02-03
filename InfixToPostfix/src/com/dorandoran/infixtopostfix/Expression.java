@@ -11,6 +11,8 @@ public class Expression {
 		terms = new ArrayList<Term>();				
 	}
 
+	// TODO: find how to check invalid expression
+	
 	// expression := summand { adding_op summand }+
 	// summand := factor { multiplying_op factor }+
 	// factor := (expression) | digit
@@ -24,17 +26,18 @@ public class Expression {
 		
 		removeWhitespace(iter); 
 		
-		return result && iter.current() == CharacterIterator.DONE;
+		return result && iter.current() == CharacterIterator.DONE;		
 	}
 
 	// expression := summand { adding_op summand }*
 	private boolean parseExpression(CharacterIterator iter) {
 		if (parseSummand(iter)) {
 			while(parseAddOperator(iter)) {
-				if (!parseSummand(iter)) {
+				if (!parseSummand(iter)) {					
 					return false;
 				}
 			}
+			
 			return true;
 		}
 		
@@ -120,7 +123,7 @@ public class Expression {
 			return true;
 		}
 		
-		return false;			
+		return false;
 	}
 	
 	private boolean parseMultiplyOperator(CharacterIterator iter) {

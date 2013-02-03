@@ -1,6 +1,7 @@
 package com.dorandoran.infixtopostfix;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
@@ -16,31 +17,76 @@ public class InfixToPostfix {
 		
 		postfixList = new ArrayList<String>();
 	}
+
+	class MyString {
+		StringBuilder string;
+		
+		public MyString() {
+			string = new StringBuilder();			
+		}
+		
+		public MyString append(CharSequence cs) {
+			if (string.length() > 0) {
+				string.append(" ");
+			}
+			
+			string.append(cs);
+			
+			return this;
+		}
+
+		public MyString append(Object obj) {
+			return append(obj.toString());
+		}
+		
+		@Override
+		public String toString() {
+			return string.toString();
+		}
+	}
 	
 	public String toPostfix2(String infix) {
-		StringBuilder out = new StringBuilder();
+		MyString out = new MyString();
 		Stack<Term> stack = new Stack<Term>();
 		
 		Expression expr = new Expression();
+			
 		expr.parse(infix);
 		
 		for (Term term : expr.getTermsInOrder()) {
 			if (term instanceof Digit) {
-				out.append(term).append(" ");
+				out.append(term);
 			} else {
 				if (term instanceof Operator) {
 					Operator curOp = (Operator)term;
 					
-					if (curOp.hasHigherPriorityThan(stack.peek())) {
+					// TODO: 
+					// if empty push
+					// else while stack is not empty and not "(",
+					//	if top of stack is higher than op then pop and append top to buffer
+					//	else break;
+					// push op
+					if (stack.isEmpty()) {
 						stack.push(term);
-					} else {
-						out.append(stack.pop()).append(" ");
+					} else {										
+						while (!(stack.isEmpty()) && !curOp.isHigherPriorityThan(stack.peek())) {
+							out.append(stack.pop());
+						}
+						
 						stack.push(term);
-					}
+					}					
 				} else if (term instanceof LeftParen) {
-					
+					stack.push(term);
 				} else if (term instanceof RightParen) {
-					
+					while (!stack.empty()) {
+						Term top = stack.pop();
+						
+						if (top instanceof LeftParen) {
+							break;
+						}
+						
+						out.append(top);
+					}
 				}
 			}
 		}
@@ -48,46 +94,13 @@ public class InfixToPostfix {
 		return buildString(out, stack);
 	}
 	
-	private String buildString(StringBuilder out, Stack<Term> stack2) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public String toPostfix(String infix) {
-		Stack<String> operators = new Stack<String>();
+	private String buildString(MyString out, Stack<Term> operators) {
+		StringBuilder result = new StringBuilder(out.toString());
 		
-		StringBuilder postfix = new StringBuilder();
-				
-		for (int i = 0; i < infix.length(); ++ i) {
-			char c = infix.charAt(i);
-			
-			if (Character.isWhitespace(c)) {
-				continue;
-			}
-			
-			if (Character.isDigit(c)) {
-				if (postfix.length() > 0)
-					postfix.append(" ");
-				
-				postfix.append(c);
-				
-				postfixList.add(String.valueOf(c));
-			} else {
-				stack[stackIndex ++] = c;
-				
-				operators.push(String.valueOf(c));
-			}
+		while(!operators.empty()) {
+			result.append(" ").append(operators.pop());
 		}
 		
-		while (stackIndex > 0) {
-			if (stackIndex >= 1) {
-				postfix.append(" ");
-			}
-				
-			postfix.append(stack[--stackIndex]);
-		}
-		
-		return postfix.toString();
+		return result.toString();
 	}
-	
 }
